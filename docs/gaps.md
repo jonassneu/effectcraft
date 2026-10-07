@@ -63,6 +63,13 @@ The most important missing piece: it turns every other estimate here into a meas
 
 ### G2. Real-user reliability on every platform
 
+- Regression evidence for [#209](https://github.com/storytold/effectcraft/issues/209): Audio
+  Spectrum and Audio Waveform declare their time dependence so a cached preview follows the
+  audio. Synthetic-audio tests in `render::tests_audio_fx` compare cached and uncached frames
+  while scrubbing forward and backward, verify repeated-frame cache hits, and cover offset,
+  stretched visualizer layers. Editing the referenced audio layer can still leave an already
+  cached frame stale; cross-layer cache invalidation remains a separate gap.
+
 - Fix user issues as they come in, each with a regression test, and answer the reporter (#41–#47
   and #63–#68 are handled, as are the Windows report that the font menus missed installed fonts
   and the reports of 6 October, #85, #88, #89, #93, #103, #106 and #117; Wayland file drops wait

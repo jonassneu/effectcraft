@@ -1,0 +1,8 @@
+asset:        audio-preview-after.png
+title:        Audio visualizer cached preview — after
+author:       EffectCraft contributors
+source:       original work (full EffectcraftApp UI rendered headlessly with egui_kittest and wgpu)
+license:      MIT OR Apache-2.0
+license-file:
+added:        2026-10-07 by Codex (agent) for jonassneu
+notes:        Unmodified screenshot of EffectCraft on the issue 209 fix. Original synthetic stereo 1 kHz PCM tone is silent before 0.5 s and after 1.2 s. Audio Spectrum and Audio Waveform are visible in the same composition. The viewer layer cache was warmed at 0.0 s, then the playhead was moved to frame 24 (0.8 s). Full resolution, 85% magnification; matching project, layout and selection in both captures. No third-party media.

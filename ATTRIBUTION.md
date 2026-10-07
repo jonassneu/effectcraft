@@ -49,6 +49,8 @@ Screenshots of EffectCraft itself, rendered headlessly, showing only procedurall
 
 | Asset | Author | Source | Licence |
 |---|---|---|---|
+| `docs/fidelity/audio-preview-before.png` | EffectCraft contributors | Original work: full EffectCraft UI screenshot before the audio visualizer cache fix (#209), showing synthetic audio | MIT OR Apache-2.0 |
+| `docs/fidelity/audio-preview-after.png` | EffectCraft contributors | Original work: full EffectCraft UI screenshot after the audio visualizer cache fix (#209), showing the same synthetic audio | MIT OR Apache-2.0 |
 | `docs/images/effectcraft-hero.png` | EffectCraft contributors | Original work: screenshot of EffectCraft (EffectCraft main window) | MIT OR Apache-2.0 |
 | `docs/images/effectcraft-3d.png` | EffectCraft contributors | Original work: screenshot of EffectCraft (EffectCraft Classic 3D) | MIT OR Apache-2.0 |
 | `docs/images/effectcraft-graph-editor.png` | EffectCraft contributors | Original work: screenshot of EffectCraft (EffectCraft Graph Editor) | MIT OR Apache-2.0 |

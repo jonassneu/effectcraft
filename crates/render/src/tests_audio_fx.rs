@@ -214,3 +214,80 @@ fn peak_summary_bins() {
     assert_eq!(peaks.len(), 200);
     assert!((peaks[150][1] - 1.51).abs() < 0.01, "{:?}", peaks[150]);
 }
+
+/// A static solid visualising an audio layer: only the sampled sound changes between frames.
+fn visualizer_scene(id: &str, start: f64, stretch: f64) -> (Project, ItemId) {
+    let mut p = Project::default();
+    let mut comp = Comp::new(320, 160, FrameRate::FPS_30, Tick::from_seconds_f64(2.0));
+    let aid = p.add_item("Synthetic tone", effectcraft_color::Label::SeaFoam, None, ItemKind::Footage(audio_footage()));
+    let audio = build::layer(&mut p, &comp, "Audio", LayerSource::Footage { item: aid }, (320, 160), None);
+    let sid = p.add_item("Solid", effectcraft_color::Label::Red, None, ItemKind::Solid(Solid { color: [0.0; 3], width: 320, height: 160, pixel_aspect: 1.0 }));
+    let mut solid = build::layer(&mut p, &comp, "Visualizer", LayerSource::Solid { item: sid }, (320, 160), None);
+    solid.start_time = Tick::from_seconds_f64(start);
+    solid.stretch = stretch;
+    let spec = effectcraft_effects::find(id).unwrap();
+    let mut next = p.next_id;
+    let mut g = effectcraft_effects::instantiate(spec, &mut Ids(&mut next), spec.name, [320.0, 160.0]);
+    g.prop_mut("audioLayer").unwrap().value = Value::Layer(Some(audio.id.0));
+    g.prop_mut("maximumHeight").unwrap().value = Value::Scalar(60.0);
+    g.prop_mut("softness").unwrap().value = Value::Scalar(0.0);
+    if id == "ec.generate.audiospectrum" {
+        g.prop_mut("frequencyBands").unwrap().value = Value::Scalar(32.0);
+        g.prop_mut("sideOptions").unwrap().value = Value::Enum(2);
+    } else {
+        g.prop_mut("audioDuration").unwrap().value = Value::Scalar(6.0);
+    }
+    p.next_id = next;
+    solid.props.sub_mut("effects").unwrap().children.push(g.into());
+    comp.layers = vec![solid, audio];
+    let cid = p.add_item("Audio visualizer", effectcraft_color::Label::Sandstone, None, ItemKind::Comp(comp.into()));
+    (p, cid)
+}
+
+fn visualizer_follows_time_through_layer_cache(id: &str, start: f64, stretch: f64) {
+    fn tone(t: f64) -> (f32, f32) {
+        let v = if (0.5..1.2).contains(&t) { (2.0 * std::f64::consts::PI * 1000.0 * t).sin() as f32 } else { 0.0 };
+        (v, v)
+    }
+    let (p, cid) = visualizer_scene(id, start, stretch);
+    let src = Signal(tone);
+    let cache = crate::LayerCache::default();
+    let render = |t: f64, cached: bool| {
+        let mut r = crate::Renderer::new(&p, &src, crate::RenderOpts::default());
+        r.cache = cached.then_some(&cache);
+        r.comp_frame(cid, Tick::from_seconds_f64(t))
+    };
+    let silent = render(0.0, true);
+    let expected = render(0.8, false);
+    assert!(silent.data.iter().zip(&expected.data).filter(|(a, b)| a != b).count() > 100, "{id}: the synthetic tone must change the image");
+    let sounding = render(0.8, true);
+    let changed = sounding.data.iter().zip(&expected.data).filter(|(a, b)| a != b).count();
+    assert_eq!(changed, 0, "{id}: a warmed layer cache must follow the audio at the new time");
+    // Repeated requests still reuse the processed layer at the same time.
+    let hits = cache.stats().hits;
+    assert_eq!(render(0.8, true).data, expected.data);
+    assert!(cache.stats().hits > hits, "{id}: the same frame should hit the layer cache");
+    // Scrub through silence and back: neither direction may reuse a different time's pixels.
+    for t in [1.6, 0.0, 0.8] {
+        assert_eq!(render(t, true).data, render(t, false).data, "{id}: cached and uncached frames at {t} s must match");
+    }
+}
+
+#[test]
+fn audio_spectrum_follows_time_through_layer_cache() {
+    visualizer_follows_time_through_layer_cache("ec.generate.audiospectrum", 0.0, 100.0);
+}
+
+#[test]
+fn audio_waveform_follows_time_through_layer_cache() {
+    visualizer_follows_time_through_layer_cache("ec.generate.audiowaveform", 0.0, 100.0);
+}
+
+#[test]
+fn audio_visualizers_follow_composition_time_on_a_stretched_layer() {
+    // At comp time 0.8 s the solid's layer time is 0.25 s, where the signal is silent.
+    // Requiring a changed image also proves that the effects sample composition time.
+    for id in ["ec.generate.audiospectrum", "ec.generate.audiowaveform"] {
+        visualizer_follows_time_through_layer_cache(id, 0.3, 200.0);
+    }
+}
