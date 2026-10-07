@@ -1107,7 +1107,7 @@ pub const TIME_DEPENDENT: &[&str] = &[
     "ec.obsolete.lightning",
     "ec.text.timecode",
     "ec.text.numbers",
-    // Audio visualisers sample the Audio Layer around the current composition time.
+    // The audio visualisers read the Audio Layer's samples around the frame time.
     "ec.generate.audiospectrum",
     "ec.generate.audiowaveform",
     // Path Text's jitter changes every frame.
