@@ -1,0 +1,8 @@
+asset:        gpu-dust-before-after.png
+title:        NVIDIA Dust & Scratches threshold rounding before and after
+author:       EffectCraft contributors
+source:       original work
+license:      MIT OR Apache-2.0
+license-file: ../../LICENSE-MIT
+added:        2026-10-07 by EffectCraft contributors
+notes:        Actual RTX 4070 Ti/Vulkan and CPU renders of tests::pattern seed 7 (70x44), quantized to 8 bpc, Dust & Scratches radius 3 and threshold 10. Before is upstream 3af4649; after uses CPU-rounded median levels. Premultiplied pixels are displayed over a generated checkerboard with nearest-neighbour magnification; yellow boxes mark pixel (51, 38). Labels use the repository's OFL-licensed Inter font. No third-party media.
